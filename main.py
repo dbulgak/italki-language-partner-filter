@@ -3,8 +3,13 @@ import configparser
 import time
 import logging
 import argparse
+import webbrowser
 
-def get_partner(config):
+def get_partner(args, config):
+    limit = int(config['LIMIT'])
+
+    logging.info(f"ready to search, limiting to {limit}")
+
     found = 0
     page = 1
 
@@ -19,6 +24,9 @@ def get_partner(config):
         for item in r.json()['data']:
             learning = []
             speaking = []
+
+            # lang can be either learning or be learned
+            # learning languages are added into list of all languages on a profile page
 
             for lang in item['language_obj_s']:
                 if lang['is_learning']:
@@ -40,18 +48,22 @@ def get_partner(config):
                 # logging.info(f"{item['nickname']} is not a native english speaker")
                 continue
 
-
             match = filter_learning_lang(learning)
 
             if match == False:
                 logging.info(f"{item['nickname']} does not learn russian")
                 continue
 
-            logging.info(f"MATCH: {item['nickname']} -> {item['learning_language']} -> https://www.italki.com/user/{item['id']}")
+            user_profile = "https://www.italki.com/user/" + str(item['id'])
+            logging.info(f"MATCH: {item['nickname']} -> {item['learning_language']} -> {user_profile}")
             logging.info(f"learning: f{learning}, speaking: f{speaking}")
+
+            if args.web == True:
+                webbrowser.open(user_profile)
+            
             found = found + 1
 
-        if found >= int(config['LIMIT']):
+        if found >= limit:
             break
 
         page = page + 1
@@ -79,6 +91,7 @@ def setup_args_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-c', '--config', help="config file", default=".config")
+    parser.add_argument('-w', '--web', help="open in browser", action='store_true', default=False)
 
     return parser
 
@@ -100,7 +113,7 @@ def main():
     config.read(args.config)
     default_section = config['default']
 
-    get_partner(default_section)
+    get_partner(args, default_section)
 
 
 if __name__ == "__main__":
