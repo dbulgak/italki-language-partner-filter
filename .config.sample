@@ -1,0 +1,6 @@
+[default]
+PARTNER_API=https://api.italki.com/api/partner
+# NOTE: replace % with %% if you have this in your token
+# To get a token you have to login to https://www.italki.com/partners and check you network panel, it should be among params of the page. Then write it here
+TOKEN=
+LIMIT=10
