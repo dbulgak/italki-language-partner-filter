@@ -5,8 +5,10 @@ import logging
 import argparse
 import webbrowser
 
-def get_partner(args, config):
-    limit = int(config['LIMIT'])
+PARTNER_API="https://api.italki.com/api/partner"
+
+def get_partner(args):
+    limit = int(args.limit)
 
     logging.info(f"ready to search, limiting to {limit}")
 
@@ -15,9 +17,9 @@ def get_partner(args, config):
 
     while True:
         # /api/partner?speak=&learn=&gender=&country=AF&city=&page=1&hl=en-us&i_token=1599892361gAAAAABfNN6J6NhPopyFFVUaPw1cQYI_kBWOyZFQ-pHcp-PyJzkE_f0vjEhCHts5rbwVRyX3OuLRmZQZgls1hROi7dkkDfFbr5OvXDaQfehS-b7EZWG2zESH8PirGyt0OCLcvnsOuvHVVCKuB1S8HIoqu2zqK02QhSt5TsyMr85Doir4An6YrFk%3D&i_device=10
-        params={"learn": "russian", "i_device": "10", "i_token": config['TOKEN'], "page": page}
+        params={"learn": "russian", "i_device": "10", "page": page}
         logging.info(f"making requests with params {params}")
-        r = requests.get(config['PARTNER_API'], params=params)
+        r = requests.get(PARTNER_API, params=params)
 
         # logging.info(r.text)
 
@@ -90,8 +92,8 @@ def filter_learning_lang(learning):
 def setup_args_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
-    parser.add_argument('-c', '--config', help="config file", default=".config")
     parser.add_argument('-w', '--web', help="open in browser", action='store_true', default=False)
+    parser.add_argument('-l', '--limit', help="number of people to find", default=10)
 
     return parser
 
@@ -109,11 +111,7 @@ def main():
 
     setup_logging(args)
 
-    config = configparser.ConfigParser()
-    config.read(args.config)
-    default_section = config['default']
-
-    get_partner(args, default_section)
+    get_partner(args)
 
 
 if __name__ == "__main__":
